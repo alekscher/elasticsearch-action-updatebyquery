@@ -377,7 +377,9 @@ public class TransportUpdateByQueryAction extends TransportAction<UpdateByQueryR
             void handleException(Throwable e, ShardRouting shard) {
                 logger.debug("[{}][{}] error while executing update by query shard request", e, request.index(), shard.id());
                 String failure = ExceptionsHelper.detailedMessage(e);
-                shardResponses.set(indexCounter.getAndIncrement(), new ShardUpdateByQueryResponse(shard.id(), failure));
+                if (shardResponses.length() > indexCounter.incrementAndGet()) {
+                	shardResponses.set(indexCounter.get(), new ShardUpdateByQueryResponse(shard.id(), failure));
+                }
                 if (indexCounter.get() == numberOfExpectedShardResponses) {
                     finalizeAction();
                 }
